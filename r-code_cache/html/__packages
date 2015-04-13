@@ -1,0 +1,11 @@
+base
+bitops
+RCurl
+RJSONIO
+ggplot2
+plotly
+data.table
+knitr
+dplyr
+microbenchmark
+readr
