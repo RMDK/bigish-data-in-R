@@ -16,7 +16,7 @@ This is an R version of a recent article [Big data analytics with Pandas and SQL
 
 This document is not meant to make any claims that R is better or faster than Python for data analysis, I myself use both languages daily. The plotly article simply provides an opportunity to compare the two languages. 
 
-The [data](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9) from this article is updated daily, therefore my version of the file is quite a bit larger at 4.63 GB. Therefore, expect the charts return different results compared to the article. 
+The [data](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9) from this article is updated daily, therefore my version of the file is quite a bit larger at 4.63 GB. Therefore, expect the charts to return different results compared to the article. 
 
 Here are the details quoted from the article...
 <hr>
