@@ -80,7 +80,7 @@ This defeats the purpose of this article, but **R can** load this data into memo
 
 ## On-Disk Analysis in R with dplyr
 
-While `dplyr` is capable of writing to databases, the data still must flow through R, which would probably be considered cheating in this case. The alternative is to simply to create a database and import the csv using the command line. Please create a pull request for [this github repository]() if you have any other suggestions. 
+While `dplyr` is capable of writing to databases, the data still must flow through R, which would probably be considered cheating in this case. The alternative is to simply to create a database and import the csv using the command line. Please create a pull request for [this github repository](https://github.com/RMDK/bigish-data-in-R) if you have any other suggestions. 
 
 Here is the code I typed into the command line. Pretty easy right? This assumes you have sqlite3 installed and available on your PATH variable (hence accessible via terminal).
 
@@ -696,4 +696,4 @@ py$ggplotly(plt, session='knitr')
 
 ## Contact me
 
-#### [twitter](https://twitter.com/ryanmdk) | email.ryan.kelly@gmail.com | [github]()
+#### [twitter](https://twitter.com/ryanmdk) | email.ryan.kelly@gmail.com | [github](https://github.com/RMDK/bigish-data-in-R)

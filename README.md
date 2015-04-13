@@ -8,4 +8,8 @@ Link to article:
 SQLite](https://plot.ly/ipython-notebooks/big-data-analytics-with-pandas
 -and-sqlite/)
 
+Link to this article on Rpubs
+
+[Big-ish Data Workflow in R](http://rpubs.com/ryankelly/big-data-workflow-r)
+
 Please make comments or suggestions via email, issues, or pull requests. 
