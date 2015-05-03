@@ -1,7 +1,8 @@
 # Big-ish Data Workflow in R
 Ryan Kelly  
 April 11, 2015  
-## Introduction
+
+
 
 This is an R version of a recent article [Big data analytics with Pandas and SQLite](https://plot.ly/ipython-notebooks/big-data-analytics-with-pandas-and-sqlite/) by [plotly](https://plot.ly/feed/). I'd argue this is 'medium' data, however, I understand the need to generate a nice headline. For the R folks, I also expand on alternative packages and methods that may improve the workflow. 
 
@@ -44,23 +45,23 @@ Since we are using R, we will be substituting the python packages with the close
 
 
 
-```r
+{% highlight r %}
 install.packages("devtools")
 library("devtools")
 install_github("ropensci/plotly")
-```
+{% endhighlight %}
 
 
-```r
+{% highlight r %}
 library(plotly)
-```
+{% endhighlight %}
 
 You'll need to create an account to connect to the plotly API. Or you could just stick with the default ggplot2 graphics. 
 
 
-```r
+{% highlight r %}
 set_credentials_file("DemoAccount", "lr1c37zw81") ## Replace contents with your API Key
-```
+{% endhighlight %}
 
 
 
@@ -75,20 +76,20 @@ While `dplyr` is capable of writing to databases, the data still must flow throu
 Here is the code I typed into the command line. Pretty easy right? This assumes you have sqlite3 installed and available on your PATH variable (hence accessible via terminal).
 
 
-```text
+{% highlight r %}
 $ sqlite3 data.db # Create your database
 $.databases       # Show databases to make sure it works
 $.mode csv        
 $.import <filename> <tablename>
 # Where filename is the name of the csv & tablename is the name of the new database table
 $.quit 
-```
+{% endhighlight %}
 
 Let's also load the data into memory so we can compare in memory operations along the way. Here is a crude benchmark of file I/O in R. [readr](https://github.com/hadley/readr) a recently released alternative to `read.csv` should also eat through this data quickly.  
 
 
 
-```r
+{% highlight r %}
 library(readr)
 # data.table, selecting a subset of columns
 time_data.table <- system.time(fread('/users/ryankelly/NYC_data.csv', 
@@ -102,20 +103,23 @@ time_readr <- system.time(read_csv('/users/ryankelly/NYC_data.csv'))
 
 # Default base R (really slow - don't recommend running)
 # time_base_r <- system.time(read.csv('/users/ryankelly/NYC_data.csv'))
-```
+{% endhighlight %}
 
 
 
 
-```r
-kable(data.frame(rbind(time_data.table, time_data.table_full, time_readr)))
-```
+{% highlight r %}
+data.frame(rbind(time_data.table, time_data.table_full, time_readr))
+{% endhighlight %}
 
-                        user.self   sys.self   elapsed   user.child   sys.child
----------------------  ----------  ---------  --------  -----------  ----------
-time_data.table            67.654      5.383    84.308            0           0
-time_data.table_full      213.371      5.738   226.433            0           0
-time_readr                290.729      7.542   304.974            0           0
+
+
+{% highlight text %}
+##                      user.self sys.self elapsed user.child sys.child
+## time_data.table         67.654    5.383  84.308          0         0
+## time_data.table_full   213.371    5.738 226.433          0         0
+## time_readr             290.729    7.542 304.974          0         0
+{% endhighlight %}
 
 I will be using data.table to read in the data. The `fread` function has the really nice ability to select the columns we want to read in, this speeds up the read quite a bit. The plotly article disregards all but the following columns from the dataset. 
 
@@ -157,20 +161,24 @@ By default, dplyr queries will only pull the first 10 rows from the database, an
 
 
 
-```r
+{% highlight r %}
 library(dplyr)      ## Will be used for pandas replacement
 
 # Connect to the database
 db <- src_sqlite('/users/ryankelly/data.db')
 db
-```
+{% endhighlight %}
 
-```
+
+
+{% highlight text %}
 ## src:  sqlite 3.8.6 [/users/ryankelly/data.db]
 ## tbls: NYC_data
-```
+{% endhighlight %}
 
-```r
+
+
+{% highlight r %}
 # Connect to the table of interest, which I called NYC_data
 data <- tbl(db, 'NYC_data')
 # We can pass SQL directly here to select only the columns of interest
@@ -178,7 +186,7 @@ data <- tbl(db, 'NYC_data')
 data <- tbl(db, sql('SELECT Agency, "Created Date" AS CreatedDate, 
                     "Closed Date" AS ClosedDate, "Complaint Type" AS ComplaintType,  Descriptor, City
                     FROM NYC_data'))
-```
+{% endhighlight %}
 
 <br>
 
@@ -198,135 +206,150 @@ Remember, the following analysis is completed using dplyr as a wrapper for SQL s
 
 #### Preview the data
 
-I make use of `kable()` throughout this document as a way to print pretty tables.
-
-
-```r
-# Wrapped in a function for display purposes
-head_ <- function(x, n = 5) kable(head(x, n))
-
-head_(data)
-```
 
 
 
-Agency   CreatedDate              ClosedDate   ComplaintType             Descriptor         City     
--------  -----------------------  -----------  ------------------------  -----------------  ---------
-NYPD     04/11/2015 02:13:04 AM                Noise - Street/Sidewalk   Loud Music/Party   BROOKLYN 
-DFTA     04/11/2015 02:12:05 AM                Senior Center Complaint   N/A                ELMHURST 
-NYPD     04/11/2015 02:11:46 AM                Noise - Commercial        Loud Music/Party   JAMAICA  
-NYPD     04/11/2015 02:11:02 AM                Noise - Street/Sidewalk   Loud Talking       BROOKLYN 
-NYPD     04/11/2015 02:10:45 AM                Noise - Street/Sidewalk   Loud Music/Party   NEW YORK 
+{% highlight r %}
+head(data)
+{% endhighlight %}
+
+
+
+{% highlight text %}
+##   Agency            CreatedDate ClosedDate           ComplaintType
+## 1   NYPD 04/11/2015 02:13:04 AM            Noise - Street/Sidewalk
+## 2   DFTA 04/11/2015 02:12:05 AM            Senior Center Complaint
+## 3   NYPD 04/11/2015 02:11:46 AM                 Noise - Commercial
+## 4   NYPD 04/11/2015 02:11:02 AM            Noise - Street/Sidewalk
+## 5   NYPD 04/11/2015 02:10:45 AM            Noise - Street/Sidewalk
+## 6   NYPD 04/11/2015 02:09:07 AM            Noise - Street/Sidewalk
+##         Descriptor     City
+## 1 Loud Music/Party BROOKLYN
+## 2              N/A ELMHURST
+## 3 Loud Music/Party  JAMAICA
+## 4     Loud Talking BROOKLYN
+## 5 Loud Music/Party NEW YORK
+## 6     Loud Talking BROOKLYN
+{% endhighlight %}
 
 <br>
 
 #### Select just a couple of columns
 
 
-```r
+{% highlight r %}
 # dt[, .(ComplaintType, Descriptor, Agency)]
 
 q <- data %>% select(ComplaintType, Descriptor, Agency)
-head_(q)
-```
+head(q)
+{% endhighlight %}
 
 
 
-ComplaintType             Descriptor         Agency 
-------------------------  -----------------  -------
-Noise - Street/Sidewalk   Loud Music/Party   NYPD   
-Senior Center Complaint   N/A                DFTA   
-Noise - Commercial        Loud Music/Party   NYPD   
-Noise - Street/Sidewalk   Loud Talking       NYPD   
-Noise - Street/Sidewalk   Loud Music/Party   NYPD   
+{% highlight text %}
+##             ComplaintType       Descriptor Agency
+## 1 Noise - Street/Sidewalk Loud Music/Party   NYPD
+## 2 Senior Center Complaint              N/A   DFTA
+## 3      Noise - Commercial Loud Music/Party   NYPD
+## 4 Noise - Street/Sidewalk     Loud Talking   NYPD
+## 5 Noise - Street/Sidewalk Loud Music/Party   NYPD
+## 6 Noise - Street/Sidewalk     Loud Talking   NYPD
+{% endhighlight %}
 
 <br>
 
 #### Limit the number of items retrieved
 
 
-```r
+{% highlight r %}
 # dt[, .(ComplaintType, Descriptor, Agency)][1:10]
 
 q <- data %>% select(ComplaintType, Descriptor, Agency)
-head_(q, n = 10)
-```
+head(q, n = 10)
+{% endhighlight %}
 
 
 
-ComplaintType             Descriptor                      Agency 
-------------------------  ------------------------------  -------
-Noise - Street/Sidewalk   Loud Music/Party                NYPD   
-Senior Center Complaint   N/A                             DFTA   
-Noise - Commercial        Loud Music/Party                NYPD   
-Noise - Street/Sidewalk   Loud Talking                    NYPD   
-Noise - Street/Sidewalk   Loud Music/Party                NYPD   
-Noise - Street/Sidewalk   Loud Talking                    NYPD   
-Noise - Commercial        Loud Music/Party                NYPD   
-HPD Literature Request    The ABCs of Housing - Spanish   HPD    
-Noise - Street/Sidewalk   Loud Talking                    NYPD   
-Street Condition          Plate Condition - Noisy         DOT    
+{% highlight text %}
+##              ComplaintType                    Descriptor Agency
+## 1  Noise - Street/Sidewalk              Loud Music/Party   NYPD
+## 2  Senior Center Complaint                           N/A   DFTA
+## 3       Noise - Commercial              Loud Music/Party   NYPD
+## 4  Noise - Street/Sidewalk                  Loud Talking   NYPD
+## 5  Noise - Street/Sidewalk              Loud Music/Party   NYPD
+## 6  Noise - Street/Sidewalk                  Loud Talking   NYPD
+## 7       Noise - Commercial              Loud Music/Party   NYPD
+## 8   HPD Literature Request The ABCs of Housing - Spanish    HPD
+## 9  Noise - Street/Sidewalk                  Loud Talking   NYPD
+## 10        Street Condition       Plate Condition - Noisy    DOT
+{% endhighlight %}
 
 <br>
 
 #### Filter rows with WHERE
 
 
-```r
+{% highlight r %}
 # dt[Agency == 'NYPD', .(ComplaintType, Descriptor, Agency)]
 
 q <- data %>% 
           select(ComplaintType, Descriptor, Agency) %>% 
           filter(Agency == "NYPD")
-head_(q)
-```
+head(q)
+{% endhighlight %}
 
 
 
-ComplaintType             Descriptor         Agency 
-------------------------  -----------------  -------
-Noise - Street/Sidewalk   Loud Music/Party   NYPD   
-Noise - Commercial        Loud Music/Party   NYPD   
-Noise - Street/Sidewalk   Loud Talking       NYPD   
-Noise - Street/Sidewalk   Loud Music/Party   NYPD   
-Noise - Street/Sidewalk   Loud Talking       NYPD   
+{% highlight text %}
+##             ComplaintType       Descriptor Agency
+## 1 Noise - Street/Sidewalk Loud Music/Party   NYPD
+## 2      Noise - Commercial Loud Music/Party   NYPD
+## 3 Noise - Street/Sidewalk     Loud Talking   NYPD
+## 4 Noise - Street/Sidewalk Loud Music/Party   NYPD
+## 5 Noise - Street/Sidewalk     Loud Talking   NYPD
+## 6      Noise - Commercial Loud Music/Party   NYPD
+{% endhighlight %}
 
 <br>
 
 #### Filter multiple values in a column with WHERE and IN 
 
 
-```r
+{% highlight r %}
 # dt[Agency == 'NYPD' | Agency == 'DOB', .(ComplaintType, Descriptor, Agency)]
 
 q <- data %>% select(ComplaintType, Descriptor, Agency) %>% 
                filter(Agency %in% c('DOB', 'NYPD'))
-head_(q)
-```
+head(q)
+{% endhighlight %}
 
 
 
-ComplaintType             Descriptor         Agency 
-------------------------  -----------------  -------
-Noise - Street/Sidewalk   Loud Music/Party   NYPD   
-Noise - Commercial        Loud Music/Party   NYPD   
-Noise - Street/Sidewalk   Loud Talking       NYPD   
-Noise - Street/Sidewalk   Loud Music/Party   NYPD   
-Noise - Street/Sidewalk   Loud Talking       NYPD   
+{% highlight text %}
+##             ComplaintType       Descriptor Agency
+## 1 Noise - Street/Sidewalk Loud Music/Party   NYPD
+## 2      Noise - Commercial Loud Music/Party   NYPD
+## 3 Noise - Street/Sidewalk     Loud Talking   NYPD
+## 4 Noise - Street/Sidewalk Loud Music/Party   NYPD
+## 5 Noise - Street/Sidewalk     Loud Talking   NYPD
+## 6      Noise - Commercial Loud Music/Party   NYPD
+{% endhighlight %}
 
 <br>
 
 #### Find the unique values in a column with DISTINCT
 
 
-```r
+{% highlight r %}
 # dt[, unique(City)]
 
 q <- data %>% select(City) %>% distinct()
 head(q)
-```
+{% endhighlight %}
 
-```
+
+
+{% highlight text %}
 ##       City
 ## 1 BROOKLYN
 ## 2 ELMHURST
@@ -334,37 +357,39 @@ head(q)
 ## 4 NEW YORK
 ## 5         
 ## 6  BAYSIDE
-```
+{% endhighlight %}
 
 <br>
 
 #### Query value counts with COUNT(*) and GROUP BY
 
 
-```r
+{% highlight r %}
 # dt[, .(No.Complaints = .N), Agency]
 #setkey(dt, No.Complaints) # setkey index's the data
 
 q <- data %>% select(Agency) %>% group_by(Agency) %>% summarise(No.Complaints = n())
-head_(q)
-```
+head(q)
+{% endhighlight %}
 
 
 
-Agency    No.Complaints
--------  --------------
-3-1-1             22499
-ACS                   3
-AJC                   7
-ART                   3
-CAU                   8
+{% highlight text %}
+##   Agency No.Complaints
+## 1  3-1-1         22499
+## 2    ACS             3
+## 3    AJC             7
+## 4    ART             3
+## 5    CAU             8
+## 6   CCRB             9
+{% endhighlight %}
 
 <br>
 
 #### Order the results with ORDER and -
 
 
-```r
+{% highlight r %}
 # dt[, .(No.Complaints = .N), Agency]
 #setkey(dt, No.Complaints) # setkey index's the data
 
@@ -388,17 +413,17 @@ plt <- ggplot(q[1:50,], aes(Agency, No.Complaints)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-```
+{% endhighlight %}
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/39" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/46" width="600" frameBorder="0"></iframe>
 
 <br> 
 
 #### Heat / Hot Water is the most common complaint
 
 
-```r
+{% highlight r %}
 # dt[, .(No.Complaints = .N), ComplaintType]
 #setkey(dt, No.Complaints) # setkey index's the data
 
@@ -421,10 +446,10 @@ plt <- ggplot(q[1:50,], aes(x = ComplaintType, y = No.Complaints)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-```
+{% endhighlight %}
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/40" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/47" width="600" frameBorder="0"></iframe>
 
 <br>
 
@@ -433,24 +458,26 @@ py$ggplotly(plt, session='knitr')
 How many cities are in the database?
 
 
-```r
+{% highlight r %}
 # dt[, unique(City)]
 
 q <- data %>% select(City) %>% distinct() %>% summarise(Number.of.Cities = n())
 head(q)
-```
+{% endhighlight %}
 
-```
+
+
+{% highlight text %}
 ##   Number.of.Cities
 ## 1             1818
-```
+{% endhighlight %}
 
 <br>
 
 #### Yikes - let's just plot the 10 most complained about cities
 
 
-```r
+{% highlight r %}
 # dt[, (No.Complaints = .N), City]
 #setkey(dt, No.Complaints)
 
@@ -458,23 +485,24 @@ q <- data %>% select(City) %>% group_by(City) %>%
         summarise(No.Complaints = n()) %>%
         arrange(-No.Complaints)
 
-head_(q, 10)
-```
+head(q, 10)
+{% endhighlight %}
 
 
 
-City             No.Complaints
---------------  --------------
-BROOKLYN               2671085
-NEW YORK               1692514
-BRONX                  1624292
-                        766378
-STATEN ISLAND           437395
-JAMAICA                 147133
-FLUSHING                117669
-ASTORIA                  90570
-Jamaica                  67083
-RIDGEWOOD                66411
+{% highlight text %}
+##             City No.Complaints
+## 1       BROOKLYN       2671085
+## 2       NEW YORK       1692514
+## 3          BRONX       1624292
+## 4                       766378
+## 5  STATEN ISLAND        437395
+## 6        JAMAICA        147133
+## 7       FLUSHING        117669
+## 8        ASTORIA         90570
+## 9        Jamaica         67083
+## 10     RIDGEWOOD         66411
+{% endhighlight %}
 
 <br>
 
@@ -488,7 +516,7 @@ RIDGEWOOD                66411
 - I decided to use `UPPER` to convert the CITY format.
 
 
-```r
+{% highlight r %}
 # dt[, CITY := toupper(City)][, (No.Complaints = .N), CITY]
 #setkey(dt, No.Complaints)
 
@@ -499,23 +527,24 @@ q <- tbl(db, sql('SELECT UPPER(City) as "CITY", COUNT(*) as "No.Complaints"
                     ORDER BY -"No.Complaints"
                     LIMIT 11'))
 
-head_(q, 10)
-```
+head(q, 10)
+{% endhighlight %}
 
 
 
-CITY             No.Complaints
---------------  --------------
-BROOKLYN               2671085
-NEW YORK               1692514
-BRONX                  1624292
-                        766378
-STATEN ISLAND           437395
-JAMAICA                 147133
-FLUSHING                117669
-ASTORIA                  90570
-JAMAICA                  67083
-RIDGEWOOD                66411
+{% highlight text %}
+##             CITY No.Complaints
+## 1       BROOKLYN       2671085
+## 2       NEW YORK       1692514
+## 3          BRONX       1624292
+## 4                       766378
+## 5  STATEN ISLAND        437395
+## 6        JAMAICA        147133
+## 7       FLUSHING        117669
+## 8        ASTORIA         90570
+## 9        JAMAICA         67083
+## 10     RIDGEWOOD         66411
+{% endhighlight %}
 
 <br>
 
@@ -525,7 +554,7 @@ RIDGEWOOD                66411
 
 
 
-```r
+{% highlight r %}
 # dt[, CITY := toupper(City)][, (No.Complaints = .N), .(ComplaintType, CITY)]
 #setkey(dt, No.Complaints)
 
@@ -565,20 +594,20 @@ plt <- ggplot(q_f, aes(ComplaintType, No.Complaints, fill = CITY)) +
             theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 plt
-```
+{% endhighlight %}
 
-![](r-code_files/figure-html/unnamed-chunk-18-1.png) 
+![](r-code_files/figure-html/unnamed-chunk-19-1.png) 
 
-```r
+{% highlight r %}
 # plotly cannot handle this type of plot currently.
-```
+{% endhighlight %}
 
 <br>
 
 Now let's normalize these counts. This is super easy now that this data has been reduced into a dataframe.
 
 
-```r
+{% highlight r %}
 # dt[, No.Complaints_normalized := No.Complaints / sum(No.Complaints)]
 q_f <- q_f %>% group_by(CITY) %>% 
                 mutate(Normalized.Complaints = round((No.Complaints / sum(No.Complaints))*100, 2))
@@ -590,13 +619,13 @@ plt <- ggplot(q_f, aes(ComplaintType, Normalized.Complaints, fill = CITY)) +
     ggtitle('Relative Number of Complaints by City')
 
 plt
-```
+{% endhighlight %}
 
-![](r-code_files/figure-html/unnamed-chunk-19-1.png) 
+![](r-code_files/figure-html/unnamed-chunk-20-1.png) 
 
-```r
+{% highlight r %}
 # plotly cannot handle this type of plot currently.
-```
+{% endhighlight %}
 
 - New York is loud.
 - Staten Island is quite dirty, dark and soggy
@@ -614,7 +643,7 @@ The data provided does not fit the standard date format for SQLite. We have a fe
 To illustrate using R, I will use dplyr. This is not necessarily the most optimal approach. Here I select substrings of the date fields, with `SUBSTR` and concatenate them with `||`.  
 
 
-```r
+{% highlight r %}
 data <- tbl(db, sql('SELECT Agency, "Complaint Type" AS ComplaintType, Descriptor, City,
                     SUBSTR("Created Date", 7, 4) || "-" ||
                     SUBSTR("Created Date", 4, 2) || "-" ||
@@ -631,32 +660,34 @@ data <- tbl(db, sql('SELECT Agency, "Complaint Type" AS ComplaintType, Descripto
                     SUBSTR("Closed Date", 18, 2) as ClosedDate
                     
             FROM NYC_data'))
-```
+{% endhighlight %}
 
 <br>
 
 #### Filter SQLite rows with timestamp strings: YYYY-MM-DD hh:mm:ss
 
 
-```r
+{% highlight r %}
 # dt[CreatedDate < '2014-11-26 23:47:00' & CreatedDate > '2014-09-16 23:45:00', 
 #      .(ComplaintType, CreatedDate, City)]
 
 q <- data %>% filter(CreatedDate < "2014-11-26 23:47:00",   CreatedDate > "2014-09-16 23:45:00") %>%
     select(ComplaintType, CreatedDate, City)
 
-head_(q)
-```
+head(q)
+{% endhighlight %}
 
 
 
-ComplaintType             CreatedDate           City     
-------------------------  --------------------  ---------
-Noise - Street/Sidewalk   2014-11-12 11:59:56   BRONX    
-Taxi Complaint            2014-11-12 11:59:40   BROOKLYN 
-Noise - Commercial        2014-11-12 11:58:53   BROOKLYN 
-Noise - Commercial        2014-11-12 11:58:26   NEW YORK 
-Noise - Street/Sidewalk   2014-11-12 11:58:14   NEW YORK 
+{% highlight text %}
+##             ComplaintType         CreatedDate     City
+## 1 Noise - Street/Sidewalk 2014-11-12 11:59:56    BRONX
+## 2          Taxi Complaint 2014-11-12 11:59:40 BROOKLYN
+## 3      Noise - Commercial 2014-11-12 11:58:53 BROOKLYN
+## 4      Noise - Commercial 2014-11-12 11:58:26 NEW YORK
+## 5 Noise - Street/Sidewalk 2014-11-12 11:58:14 NEW YORK
+## 6      Noise - Commercial 2014-11-12 11:56:20    BRONX
+{% endhighlight %}
 
 <br>
 
@@ -665,31 +696,33 @@ Noise - Street/Sidewalk   2014-11-12 11:58:14   NEW YORK
 - See ?strftime for all`format` methods
 
 
-```r
+{% highlight r %}
 # dt[, hour := strftime('%H', CreatedDate), .(ComplaintType, CreatedDate, City)]
 
 q <- data %>% mutate(hour = strftime('%H', CreatedDate)) %>% 
             select(ComplaintType, CreatedDate, City, hour)
 
-head_(q)
-```
+head(q)
+{% endhighlight %}
 
 
 
-ComplaintType             CreatedDate           City       hour 
-------------------------  --------------------  ---------  -----
-Noise - Street/Sidewalk   2015-11-04 02:13:04   BROOKLYN   02   
-Senior Center Complaint   2015-11-04 02:12:05   ELMHURST   02   
-Noise - Commercial        2015-11-04 02:11:46   JAMAICA    02   
-Noise - Street/Sidewalk   2015-11-04 02:11:02   BROOKLYN   02   
-Noise - Street/Sidewalk   2015-11-04 02:10:45   NEW YORK   02   
+{% highlight text %}
+##             ComplaintType         CreatedDate     City hour
+## 1 Noise - Street/Sidewalk 2015-11-04 02:13:04 BROOKLYN   02
+## 2 Senior Center Complaint 2015-11-04 02:12:05 ELMHURST   02
+## 3      Noise - Commercial 2015-11-04 02:11:46  JAMAICA   02
+## 4 Noise - Street/Sidewalk 2015-11-04 02:11:02 BROOKLYN   02
+## 5 Noise - Street/Sidewalk 2015-11-04 02:10:45 NEW YORK   02
+## 6 Noise - Street/Sidewalk 2015-11-04 02:09:07 BROOKLYN   02
+{% endhighlight %}
 
 <br>
 
 #### Count the number of complaints (rows) per hour with strftime , GROUP BY , and count(*) (n())
 
 
-```r
+{% highlight r %}
 # dt[, hour := strftime('%H', CreatedDate), .N , hour]
 
 q <- data %>% mutate(hour = strftime('%H', CreatedDate)) %>% 
@@ -704,17 +737,17 @@ plt <- ggplot(na.omit(q), aes(hour, Complaints.per.Hour)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-```
+{% endhighlight %}
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/41" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/48" width="600" frameBorder="0"></iframe>
 
 <br>
 
 #### Filter noise complaints by hour (might be easier to use `LIKE` operator in raw SQL)
 
 
-```r
+{% highlight r %}
 # dt[grepl(ComplaintType, 'Noise'), hour := strftime('%H', CreatedDate), .N , hour]
 
 q <- data %>% filter(ComplaintType %in% c( "Noise",
@@ -737,10 +770,10 @@ plt <- ggplot(na.omit(q), aes(hour, Complaints.per.Hour)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-```
+{% endhighlight %}
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/42" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/49" width="600" frameBorder="0"></iframe>
 
 <br>
 
@@ -749,7 +782,7 @@ py$ggplotly(plt, session='knitr')
 - This can be written more succinctly than the plotly article using two fields in the `GROUP_BY()` statement. 
 
 
-```r
+{% highlight r %}
 # dt[grepl(ComplaintType, 'Noise'), hour := strftime('%H', CreatedDate), .N , hour]
 # setkey(dt, Complaints.per.Hour)
 # dt[, tail(.SD, 2), hour]
@@ -776,7 +809,7 @@ plt <- ggplot(q_hr[q_hr$hour != '12',], aes(hour, Complaints.per.Hour, fill = Co
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-```
+{% endhighlight %}
 
 <br>
 
@@ -785,7 +818,7 @@ py$ggplotly(plt, session='knitr')
 #### First, create a new column with timestamps rounded to the previous 15 minute interval
 
 
-```r
+{% highlight r %}
 # Using lubridate::new_period()
 # dt[, interval := CreatedDate - new_period(900, 'seconds')][, .(CreatedDate, interval)]
 
@@ -793,30 +826,31 @@ q <- data %>%
      mutate(interval = sql("datetime((strftime('%s', CreatedDate) / 900) * 900, 'unixepoch')")) %>%                     
      select(CreatedDate, interval)
 
-head_(q, 10)
-```
+head(q, 10)
+{% endhighlight %}
 
 
 
-CreatedDate           interval            
---------------------  --------------------
-2015-11-04 02:13:04   2015-11-04 02:00:00 
-2015-11-04 02:12:05   2015-11-04 02:00:00 
-2015-11-04 02:11:46   2015-11-04 02:00:00 
-2015-11-04 02:11:02   2015-11-04 02:00:00 
-2015-11-04 02:10:45   2015-11-04 02:00:00 
-2015-11-04 02:09:07   2015-11-04 02:00:00 
-2015-11-04 02:05:47   2015-11-04 02:00:00 
-2015-11-04 02:03:43   2015-11-04 02:00:00 
-2015-11-04 02:03:29   2015-11-04 02:00:00 
-2015-11-04 02:02:17   2015-11-04 02:00:00 
+{% highlight text %}
+##            CreatedDate            interval
+## 1  2015-11-04 02:13:04 2015-11-04 02:00:00
+## 2  2015-11-04 02:12:05 2015-11-04 02:00:00
+## 3  2015-11-04 02:11:46 2015-11-04 02:00:00
+## 4  2015-11-04 02:11:02 2015-11-04 02:00:00
+## 5  2015-11-04 02:10:45 2015-11-04 02:00:00
+## 6  2015-11-04 02:09:07 2015-11-04 02:00:00
+## 7  2015-11-04 02:05:47 2015-11-04 02:00:00
+## 8  2015-11-04 02:03:43 2015-11-04 02:00:00
+## 9  2015-11-04 02:03:29 2015-11-04 02:00:00
+## 10 2015-11-04 02:02:17 2015-11-04 02:00:00
+{% endhighlight %}
 
 <br>
 
 #### Then, GROUP BY that interval and COUNT(*)
 
 
-```r
+{% highlight r %}
 # Using lubridate::new_period()
 # dt[, interval := CreatedDate - new_period(900, 'seconds')][, .N, interval]
 
@@ -825,35 +859,38 @@ q <- data %>%
      group_by(interval) %>%
      summarise(Complaints.per.Interval = n()) %>% filter(!is.na(Complaints.per.Interval))
 
-head_(q, 10)
-```
+head(q, 10)
+{% endhighlight %}
 
 
 
-interval               Complaints.per.Interval
---------------------  ------------------------
-NA                                     5447756
-2003-01-03 01:00:00                          1
-2003-01-03 03:15:00                          2
-2003-01-03 06:30:00                          2
-2003-01-03 06:45:00                          1
-2003-01-03 07:30:00                          1
-2003-01-03 09:15:00                          1
-2003-01-03 09:30:00                          1
-2003-01-03 09:45:00                          1
-2003-01-03 11:00:00                          1
+{% highlight text %}
+##               interval Complaints.per.Interval
+## 1                 <NA>                 5447756
+## 2  2003-01-03 01:00:00                       1
+## 3  2003-01-03 03:15:00                       2
+## 4  2003-01-03 06:30:00                       2
+## 5  2003-01-03 06:45:00                       1
+## 6  2003-01-03 07:30:00                       1
+## 7  2003-01-03 09:15:00                       1
+## 8  2003-01-03 09:30:00                       1
+## 9  2003-01-03 09:45:00                       1
+## 10 2003-01-03 11:00:00                       1
+{% endhighlight %}
 
-```r
+
+
+{% highlight r %}
 # Pull data into memory
 q <- collect(q %>% filter(strftime('%Y', interval) == '2003'))
-```
+{% endhighlight %}
 
 <br>
 
 #### Plot the results for 2003
 
 
-```r
+{% highlight r %}
 # Convert to proper datetime object
 q$interval <- strptime(q$interval, '%Y-%m-%d %H:%M')
 
@@ -864,17 +901,17 @@ plt <- ggplot(q, aes(x=interval, y=Complaints.per.Interval)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-```
+{% endhighlight %}
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/44" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/51" width="600" frameBorder="0"></iframe>
 
 <br>
 
 #### Same plot by hours
 
 
-```r
+{% highlight r %}
 # Using lubridate::new_period()
 # dt[, interval := CreatedDate - new_period(86400, 'seconds')][, .N, interval]
 
@@ -895,10 +932,10 @@ plt <- ggplot(q, aes(x=interval, y=Complaints.per.Interval)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-```
+{% endhighlight %}
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/45" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/52" width="600" frameBorder="0"></iframe>
 
 ## Contact me
 
