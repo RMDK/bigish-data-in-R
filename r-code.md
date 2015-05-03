@@ -45,23 +45,23 @@ Since we are using R, we will be substituting the python packages with the close
 
 
 
-{% highlight r %}
+```r
 install.packages("devtools")
 library("devtools")
 install_github("ropensci/plotly")
-{% endhighlight %}
+```
 
 
-{% highlight r %}
+```r
 library(plotly)
-{% endhighlight %}
+```
 
 You'll need to create an account to connect to the plotly API. Or you could just stick with the default ggplot2 graphics. 
 
 
-{% highlight r %}
+```r
 set_credentials_file("DemoAccount", "lr1c37zw81") ## Replace contents with your API Key
-{% endhighlight %}
+```
 
 
 
@@ -76,20 +76,20 @@ While `dplyr` is capable of writing to databases, the data still must flow throu
 Here is the code I typed into the command line. Pretty easy right? This assumes you have sqlite3 installed and available on your PATH variable (hence accessible via terminal).
 
 
-{% highlight r %}
+```text
 $ sqlite3 data.db # Create your database
 $.databases       # Show databases to make sure it works
 $.mode csv        
 $.import <filename> <tablename>
 # Where filename is the name of the csv & tablename is the name of the new database table
 $.quit 
-{% endhighlight %}
+```
 
 Let's also load the data into memory so we can compare in memory operations along the way. Here is a crude benchmark of file I/O in R. [readr](https://github.com/hadley/readr) a recently released alternative to `read.csv` should also eat through this data quickly.  
 
 
 
-{% highlight r %}
+```r
 library(readr)
 # data.table, selecting a subset of columns
 time_data.table <- system.time(fread('/users/ryankelly/NYC_data.csv', 
@@ -103,23 +103,21 @@ time_readr <- system.time(read_csv('/users/ryankelly/NYC_data.csv'))
 
 # Default base R (really slow - don't recommend running)
 # time_base_r <- system.time(read.csv('/users/ryankelly/NYC_data.csv'))
-{% endhighlight %}
+```
 
 
 
 
-{% highlight r %}
+```r
 data.frame(rbind(time_data.table, time_data.table_full, time_readr))
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##                      user.self sys.self elapsed user.child sys.child
 ## time_data.table         67.654    5.383  84.308          0         0
 ## time_data.table_full   213.371    5.738 226.433          0         0
 ## time_readr             290.729    7.542 304.974          0         0
-{% endhighlight %}
+```
 
 I will be using data.table to read in the data. The `fread` function has the really nice ability to select the columns we want to read in, this speeds up the read quite a bit. The plotly article disregards all but the following columns from the dataset. 
 
@@ -161,24 +159,20 @@ By default, dplyr queries will only pull the first 10 rows from the database, an
 
 
 
-{% highlight r %}
+```r
 library(dplyr)      ## Will be used for pandas replacement
 
 # Connect to the database
 db <- src_sqlite('/users/ryankelly/data.db')
 db
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ## src:  sqlite 3.8.6 [/users/ryankelly/data.db]
 ## tbls: NYC_data
-{% endhighlight %}
+```
 
-
-
-{% highlight r %}
+```r
 # Connect to the table of interest, which I called NYC_data
 data <- tbl(db, 'NYC_data')
 # We can pass SQL directly here to select only the columns of interest
@@ -186,7 +180,7 @@ data <- tbl(db, 'NYC_data')
 data <- tbl(db, sql('SELECT Agency, "Created Date" AS CreatedDate, 
                     "Closed Date" AS ClosedDate, "Complaint Type" AS ComplaintType,  Descriptor, City
                     FROM NYC_data'))
-{% endhighlight %}
+```
 
 <br>
 
@@ -209,13 +203,11 @@ Remember, the following analysis is completed using dplyr as a wrapper for SQL s
 
 
 
-{% highlight r %}
+```r
 head(data)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##   Agency            CreatedDate ClosedDate           ComplaintType
 ## 1   NYPD 04/11/2015 02:13:04 AM            Noise - Street/Sidewalk
 ## 2   DFTA 04/11/2015 02:12:05 AM            Senior Center Complaint
@@ -230,7 +222,7 @@ head(data)
 ## 4     Loud Talking BROOKLYN
 ## 5 Loud Music/Party NEW YORK
 ## 6     Loud Talking BROOKLYN
-{% endhighlight %}
+```
 
 <br>
 
@@ -643,7 +635,7 @@ The data provided does not fit the standard date format for SQLite. We have a fe
 To illustrate using R, I will use dplyr. This is not necessarily the most optimal approach. Here I select substrings of the date fields, with `SUBSTR` and concatenate them with `||`.  
 
 
-{% highlight r %}
+```r
 data <- tbl(db, sql('SELECT Agency, "Complaint Type" AS ComplaintType, Descriptor, City,
                     SUBSTR("Created Date", 7, 4) || "-" ||
                     SUBSTR("Created Date", 4, 2) || "-" ||
@@ -660,7 +652,7 @@ data <- tbl(db, sql('SELECT Agency, "Complaint Type" AS ComplaintType, Descripto
                     SUBSTR("Closed Date", 18, 2) as ClosedDate
                     
             FROM NYC_data'))
-{% endhighlight %}
+```
 
 <br>
 
