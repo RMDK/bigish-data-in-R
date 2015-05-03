@@ -3,7 +3,6 @@ Ryan Kelly
 April 11, 2015  
 
 
-
 This is an R version of a recent article [Big data analytics with Pandas and SQLite](https://plot.ly/ipython-notebooks/big-data-analytics-with-pandas-and-sqlite/) by [plotly](https://plot.ly/feed/). I'd argue this is 'medium' data, however, I understand the need to generate a nice headline. For the R folks, I also expand on alternative packages and methods that may improve the workflow. 
 
 This document is not meant to make any claims that R is better or faster than Python for data analysis, I myself use both languages daily. The plotly article simply provides an opportunity to compare the two languages. 
@@ -229,16 +228,14 @@ head(data)
 #### Select just a couple of columns
 
 
-{% highlight r %}
+```r
 # dt[, .(ComplaintType, Descriptor, Agency)]
 
 q <- data %>% select(ComplaintType, Descriptor, Agency)
 head(q)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##             ComplaintType       Descriptor Agency
 ## 1 Noise - Street/Sidewalk Loud Music/Party   NYPD
 ## 2 Senior Center Complaint              N/A   DFTA
@@ -246,23 +243,21 @@ head(q)
 ## 4 Noise - Street/Sidewalk     Loud Talking   NYPD
 ## 5 Noise - Street/Sidewalk Loud Music/Party   NYPD
 ## 6 Noise - Street/Sidewalk     Loud Talking   NYPD
-{% endhighlight %}
+```
 
 <br>
 
 #### Limit the number of items retrieved
 
 
-{% highlight r %}
+```r
 # dt[, .(ComplaintType, Descriptor, Agency)][1:10]
 
 q <- data %>% select(ComplaintType, Descriptor, Agency)
 head(q, n = 10)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##              ComplaintType                    Descriptor Agency
 ## 1  Noise - Street/Sidewalk              Loud Music/Party   NYPD
 ## 2  Senior Center Complaint                           N/A   DFTA
@@ -274,25 +269,23 @@ head(q, n = 10)
 ## 8   HPD Literature Request The ABCs of Housing - Spanish    HPD
 ## 9  Noise - Street/Sidewalk                  Loud Talking   NYPD
 ## 10        Street Condition       Plate Condition - Noisy    DOT
-{% endhighlight %}
+```
 
 <br>
 
 #### Filter rows with WHERE
 
 
-{% highlight r %}
+```r
 # dt[Agency == 'NYPD', .(ComplaintType, Descriptor, Agency)]
 
 q <- data %>% 
           select(ComplaintType, Descriptor, Agency) %>% 
           filter(Agency == "NYPD")
 head(q)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##             ComplaintType       Descriptor Agency
 ## 1 Noise - Street/Sidewalk Loud Music/Party   NYPD
 ## 2      Noise - Commercial Loud Music/Party   NYPD
@@ -300,24 +293,22 @@ head(q)
 ## 4 Noise - Street/Sidewalk Loud Music/Party   NYPD
 ## 5 Noise - Street/Sidewalk     Loud Talking   NYPD
 ## 6      Noise - Commercial Loud Music/Party   NYPD
-{% endhighlight %}
+```
 
 <br>
 
 #### Filter multiple values in a column with WHERE and IN 
 
 
-{% highlight r %}
+```r
 # dt[Agency == 'NYPD' | Agency == 'DOB', .(ComplaintType, Descriptor, Agency)]
 
 q <- data %>% select(ComplaintType, Descriptor, Agency) %>% 
                filter(Agency %in% c('DOB', 'NYPD'))
 head(q)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##             ComplaintType       Descriptor Agency
 ## 1 Noise - Street/Sidewalk Loud Music/Party   NYPD
 ## 2      Noise - Commercial Loud Music/Party   NYPD
@@ -325,23 +316,21 @@ head(q)
 ## 4 Noise - Street/Sidewalk Loud Music/Party   NYPD
 ## 5 Noise - Street/Sidewalk     Loud Talking   NYPD
 ## 6      Noise - Commercial Loud Music/Party   NYPD
-{% endhighlight %}
+```
 
 <br>
 
 #### Find the unique values in a column with DISTINCT
 
 
-{% highlight r %}
+```r
 # dt[, unique(City)]
 
 q <- data %>% select(City) %>% distinct()
 head(q)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##       City
 ## 1 BROOKLYN
 ## 2 ELMHURST
@@ -349,24 +338,22 @@ head(q)
 ## 4 NEW YORK
 ## 5         
 ## 6  BAYSIDE
-{% endhighlight %}
+```
 
 <br>
 
 #### Query value counts with COUNT(*) and GROUP BY
 
 
-{% highlight r %}
+```r
 # dt[, .(No.Complaints = .N), Agency]
 #setkey(dt, No.Complaints) # setkey index's the data
 
 q <- data %>% select(Agency) %>% group_by(Agency) %>% summarise(No.Complaints = n())
 head(q)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##   Agency No.Complaints
 ## 1  3-1-1         22499
 ## 2    ACS             3
@@ -374,14 +361,14 @@ head(q)
 ## 4    ART             3
 ## 5    CAU             8
 ## 6   CCRB             9
-{% endhighlight %}
+```
 
 <br>
 
 #### Order the results with ORDER and -
 
 
-{% highlight r %}
+```r
 # dt[, .(No.Complaints = .N), Agency]
 #setkey(dt, No.Complaints) # setkey index's the data
 
@@ -405,17 +392,17 @@ plt <- ggplot(q[1:50,], aes(Agency, No.Complaints)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-{% endhighlight %}
+```
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/46" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/84" width="600" frameBorder="0"></iframe>
 
 <br> 
 
 #### Heat / Hot Water is the most common complaint
 
 
-{% highlight r %}
+```r
 # dt[, .(No.Complaints = .N), ComplaintType]
 #setkey(dt, No.Complaints) # setkey index's the data
 
@@ -438,10 +425,10 @@ plt <- ggplot(q[1:50,], aes(x = ComplaintType, y = No.Complaints)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-{% endhighlight %}
+```
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/47" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/85" width="600" frameBorder="0"></iframe>
 
 <br>
 
@@ -450,26 +437,24 @@ py$ggplotly(plt, session='knitr')
 How many cities are in the database?
 
 
-{% highlight r %}
+```r
 # dt[, unique(City)]
 
 q <- data %>% select(City) %>% distinct() %>% summarise(Number.of.Cities = n())
 head(q)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##   Number.of.Cities
 ## 1             1818
-{% endhighlight %}
+```
 
 <br>
 
 #### Yikes - let's just plot the 10 most complained about cities
 
 
-{% highlight r %}
+```r
 # dt[, (No.Complaints = .N), City]
 #setkey(dt, No.Complaints)
 
@@ -478,11 +463,9 @@ q <- data %>% select(City) %>% group_by(City) %>%
         arrange(-No.Complaints)
 
 head(q, 10)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##             City No.Complaints
 ## 1       BROOKLYN       2671085
 ## 2       NEW YORK       1692514
@@ -494,7 +477,7 @@ head(q, 10)
 ## 8        ASTORIA         90570
 ## 9        Jamaica         67083
 ## 10     RIDGEWOOD         66411
-{% endhighlight %}
+```
 
 <br>
 
@@ -508,7 +491,7 @@ head(q, 10)
 - I decided to use `UPPER` to convert the CITY format.
 
 
-{% highlight r %}
+```r
 # dt[, CITY := toupper(City)][, (No.Complaints = .N), CITY]
 #setkey(dt, No.Complaints)
 
@@ -520,11 +503,9 @@ q <- tbl(db, sql('SELECT UPPER(City) as "CITY", COUNT(*) as "No.Complaints"
                     LIMIT 11'))
 
 head(q, 10)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##             CITY No.Complaints
 ## 1       BROOKLYN       2671085
 ## 2       NEW YORK       1692514
@@ -536,7 +517,7 @@ head(q, 10)
 ## 8        ASTORIA         90570
 ## 9        JAMAICA         67083
 ## 10     RIDGEWOOD         66411
-{% endhighlight %}
+```
 
 <br>
 
@@ -546,7 +527,7 @@ head(q, 10)
 
 
 
-{% highlight r %}
+```r
 # dt[, CITY := toupper(City)][, (No.Complaints = .N), .(ComplaintType, CITY)]
 #setkey(dt, No.Complaints)
 
@@ -586,20 +567,20 @@ plt <- ggplot(q_f, aes(ComplaintType, No.Complaints, fill = CITY)) +
             theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 plt
-{% endhighlight %}
+```
 
-![](r-code_files/figure-html/unnamed-chunk-19-1.png) 
+![](r-code_files/figure-html/unnamed-chunk-18-1.png) 
 
-{% highlight r %}
+```r
 # plotly cannot handle this type of plot currently.
-{% endhighlight %}
+```
 
 <br>
 
 Now let's normalize these counts. This is super easy now that this data has been reduced into a dataframe.
 
 
-{% highlight r %}
+```r
 # dt[, No.Complaints_normalized := No.Complaints / sum(No.Complaints)]
 q_f <- q_f %>% group_by(CITY) %>% 
                 mutate(Normalized.Complaints = round((No.Complaints / sum(No.Complaints))*100, 2))
@@ -611,13 +592,13 @@ plt <- ggplot(q_f, aes(ComplaintType, Normalized.Complaints, fill = CITY)) +
     ggtitle('Relative Number of Complaints by City')
 
 plt
-{% endhighlight %}
+```
 
-![](r-code_files/figure-html/unnamed-chunk-20-1.png) 
+![](r-code_files/figure-html/unnamed-chunk-19-1.png) 
 
-{% highlight r %}
+```r
 # plotly cannot handle this type of plot currently.
-{% endhighlight %}
+```
 
 - New York is loud.
 - Staten Island is quite dirty, dark and soggy
@@ -659,7 +640,7 @@ data <- tbl(db, sql('SELECT Agency, "Complaint Type" AS ComplaintType, Descripto
 #### Filter SQLite rows with timestamp strings: YYYY-MM-DD hh:mm:ss
 
 
-{% highlight r %}
+```r
 # dt[CreatedDate < '2014-11-26 23:47:00' & CreatedDate > '2014-09-16 23:45:00', 
 #      .(ComplaintType, CreatedDate, City)]
 
@@ -667,11 +648,9 @@ q <- data %>% filter(CreatedDate < "2014-11-26 23:47:00",   CreatedDate > "2014-
     select(ComplaintType, CreatedDate, City)
 
 head(q)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##             ComplaintType         CreatedDate     City
 ## 1 Noise - Street/Sidewalk 2014-11-12 11:59:56    BRONX
 ## 2          Taxi Complaint 2014-11-12 11:59:40 BROOKLYN
@@ -679,7 +658,7 @@ head(q)
 ## 4      Noise - Commercial 2014-11-12 11:58:26 NEW YORK
 ## 5 Noise - Street/Sidewalk 2014-11-12 11:58:14 NEW YORK
 ## 6      Noise - Commercial 2014-11-12 11:56:20    BRONX
-{% endhighlight %}
+```
 
 <br>
 
@@ -688,18 +667,16 @@ head(q)
 - See ?strftime for all`format` methods
 
 
-{% highlight r %}
+```r
 # dt[, hour := strftime('%H', CreatedDate), .(ComplaintType, CreatedDate, City)]
 
 q <- data %>% mutate(hour = strftime('%H', CreatedDate)) %>% 
             select(ComplaintType, CreatedDate, City, hour)
 
 head(q)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##             ComplaintType         CreatedDate     City hour
 ## 1 Noise - Street/Sidewalk 2015-11-04 02:13:04 BROOKLYN   02
 ## 2 Senior Center Complaint 2015-11-04 02:12:05 ELMHURST   02
@@ -707,14 +684,14 @@ head(q)
 ## 4 Noise - Street/Sidewalk 2015-11-04 02:11:02 BROOKLYN   02
 ## 5 Noise - Street/Sidewalk 2015-11-04 02:10:45 NEW YORK   02
 ## 6 Noise - Street/Sidewalk 2015-11-04 02:09:07 BROOKLYN   02
-{% endhighlight %}
+```
 
 <br>
 
 #### Count the number of complaints (rows) per hour with strftime , GROUP BY , and count(*) (n())
 
 
-{% highlight r %}
+```r
 # dt[, hour := strftime('%H', CreatedDate), .N , hour]
 
 q <- data %>% mutate(hour = strftime('%H', CreatedDate)) %>% 
@@ -729,17 +706,17 @@ plt <- ggplot(na.omit(q), aes(hour, Complaints.per.Hour)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-{% endhighlight %}
+```
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/48" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/86" width="600" frameBorder="0"></iframe>
 
 <br>
 
 #### Filter noise complaints by hour (might be easier to use `LIKE` operator in raw SQL)
 
 
-{% highlight r %}
+```r
 # dt[grepl(ComplaintType, 'Noise'), hour := strftime('%H', CreatedDate), .N , hour]
 
 q <- data %>% filter(ComplaintType %in% c( "Noise",
@@ -762,10 +739,10 @@ plt <- ggplot(na.omit(q), aes(hour, Complaints.per.Hour)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-{% endhighlight %}
+```
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/49" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/87" width="600" frameBorder="0"></iframe>
 
 <br>
 
@@ -774,7 +751,7 @@ py$ggplotly(plt, session='knitr')
 - This can be written more succinctly than the plotly article using two fields in the `GROUP_BY()` statement. 
 
 
-{% highlight r %}
+```r
 # dt[grepl(ComplaintType, 'Noise'), hour := strftime('%H', CreatedDate), .N , hour]
 # setkey(dt, Complaints.per.Hour)
 # dt[, tail(.SD, 2), hour]
@@ -801,7 +778,7 @@ plt <- ggplot(q_hr[q_hr$hour != '12',], aes(hour, Complaints.per.Hour, fill = Co
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-{% endhighlight %}
+```
 
 <br>
 
@@ -810,7 +787,7 @@ py$ggplotly(plt, session='knitr')
 #### First, create a new column with timestamps rounded to the previous 15 minute interval
 
 
-{% highlight r %}
+```r
 # Using lubridate::new_period()
 # dt[, interval := CreatedDate - new_period(900, 'seconds')][, .(CreatedDate, interval)]
 
@@ -819,11 +796,9 @@ q <- data %>%
      select(CreatedDate, interval)
 
 head(q, 10)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##            CreatedDate            interval
 ## 1  2015-11-04 02:13:04 2015-11-04 02:00:00
 ## 2  2015-11-04 02:12:05 2015-11-04 02:00:00
@@ -835,14 +810,14 @@ head(q, 10)
 ## 8  2015-11-04 02:03:43 2015-11-04 02:00:00
 ## 9  2015-11-04 02:03:29 2015-11-04 02:00:00
 ## 10 2015-11-04 02:02:17 2015-11-04 02:00:00
-{% endhighlight %}
+```
 
 <br>
 
 #### Then, GROUP BY that interval and COUNT(*)
 
 
-{% highlight r %}
+```r
 # Using lubridate::new_period()
 # dt[, interval := CreatedDate - new_period(900, 'seconds')][, .N, interval]
 
@@ -852,11 +827,9 @@ q <- data %>%
      summarise(Complaints.per.Interval = n()) %>% filter(!is.na(Complaints.per.Interval))
 
 head(q, 10)
-{% endhighlight %}
+```
 
-
-
-{% highlight text %}
+```
 ##               interval Complaints.per.Interval
 ## 1                 <NA>                 5447756
 ## 2  2003-01-03 01:00:00                       1
@@ -868,21 +841,19 @@ head(q, 10)
 ## 8  2003-01-03 09:30:00                       1
 ## 9  2003-01-03 09:45:00                       1
 ## 10 2003-01-03 11:00:00                       1
-{% endhighlight %}
+```
 
-
-
-{% highlight r %}
+```r
 # Pull data into memory
 q <- collect(q %>% filter(strftime('%Y', interval) == '2003'))
-{% endhighlight %}
+```
 
 <br>
 
 #### Plot the results for 2003
 
 
-{% highlight r %}
+```r
 # Convert to proper datetime object
 q$interval <- strptime(q$interval, '%Y-%m-%d %H:%M')
 
@@ -893,17 +864,17 @@ plt <- ggplot(q, aes(x=interval, y=Complaints.per.Interval)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-{% endhighlight %}
+```
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/51" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/89" width="600" frameBorder="0"></iframe>
 
 <br>
 
 #### Same plot by hours
 
 
-{% highlight r %}
+```r
 # Using lubridate::new_period()
 # dt[, interval := CreatedDate - new_period(86400, 'seconds')][, .N, interval]
 
@@ -924,10 +895,10 @@ plt <- ggplot(q, aes(x=interval, y=Complaints.per.Interval)) +
 # Convert to plotly object
 py <- plotly()
 py$ggplotly(plt, session='knitr')
-{% endhighlight %}
+```
 
 <iframe height="600" id="igraph" scrolling="no" seamless="seamless"
-				src="https://plot.ly/~rmdk/52" width="600" frameBorder="0"></iframe>
+				src="https://plot.ly/~rmdk/90" width="600" frameBorder="0"></iframe>
 
 ## Contact me
 
